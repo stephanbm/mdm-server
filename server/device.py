@@ -76,6 +76,7 @@ class device:
         d['owner'] = self.owner
         d['location'] = self.location
         d['geo'] = self.GEO
+        # TODO: Add override for unacknoledged problem
         d['status'] = ['success', 'warning', 'default', 'danger'][self.status]
         #d['icon'] = ['ok', 'refresh', 'remove'][self.status] # possible glyphicon functionality
 
@@ -189,7 +190,7 @@ class device:
             self.cmdList[cmdUUID]['status'] = 'success'
             self.status = 0
         elif response['Status'] == 'Error':
-            self.cmdList[cmdUUID]['status'] = 'danger'
+            self.cmdList[cmdUUID]['status'] = 'default'
             self.status = 2
 
     def checkTimeout(self):
@@ -210,7 +211,7 @@ class device:
                     self.cmdList[cmd['CommandUUID']] = {}
                     self.cmdList[cmd['CommandUUID']]['cmd'] = cmd
                     self.cmdList[cmd['CommandUUID']]['response'] = {'Status':'TimeoutError'}
-                    self.cmdList[cmd['CommandUUID']]['status'] = 'danger'
+                    self.cmdList[cmd['CommandUUID']]['status'] = 'default'
                     self.cmdList[cmd['CommandUUID']]['order'] = len(self.cmdList.keys())
                     return
 
@@ -218,7 +219,7 @@ class device:
         for commandUUID in self.cmdList:
             if self.cmdList[commandUUID]['response'] == "" and now-self.cmdList[commandUUID]['cmd']['TimeStamp'] > self.TIMEOUT:
                 self.status = 2
-                self.cmdList[command['cmd']['CommandUUID']]['status'] = 'danger'
+                self.cmdList[command['cmd']['CommandUUID']]['status'] = 'default'
                 self.cmdList[command['cmd']['CommandUUID']]['response'] = {'Status':'TimeoutError'}
 
 

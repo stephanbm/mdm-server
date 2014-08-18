@@ -7,6 +7,9 @@ body {
 .warning{
     color: #F89406;
 }
+.default{
+    color: #333;
+}
 .danger{
     color: #B94A48;
 }
