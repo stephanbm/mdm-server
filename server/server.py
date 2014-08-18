@@ -109,6 +109,8 @@ urls = (
     '/devices', 'dev_tab',
     '/response', 'get_response',
     '/metadata', 'metadata',
+    '/sentrylocation', 'sentry_loc',
+    '/sentrycheckin', 'sentrycheckin',
 )
 
 
@@ -522,7 +524,6 @@ def read_devices():
         device_list = pickle.load(file('devicelist.pickle'))
         print "LOADED PICKLE"
     except:
-        print "NO DATA IN PICKLE FILE or PICKLE FILE DOES NOT EXIST"
         # Creating new pickle file if need be
         open('devicelist.pickle', 'a').close()
 
@@ -569,12 +570,47 @@ class enroll_profile:
         else:
             raise web.notfound()
 
+class sentrycheckin:
+# Class to match up SentryApp instance with device UDID
+    def POST(self):
+        global device_list
+
+        i = web.data()
+        tempUDID = ''
+
+        for key in device_list:
+            if tempUDID == '' and device_list[key].getName() == str(i):
+                tempUDID = device_list[key].getUDID()
+            elif device_list[key].getName() == str(i):
+                # Two devices with the same name
+                print "PROBLEM: Non-unique device name."
+                print "Cannot determine UDID."
+                return ''
+        print "SENDING UDID TO", device_list[key].getName()
+
+        return tempUDID
+
 class do_problem:
-    # DEBUG
-    # DEPRICATED?
-    # TODO: Problems may need to be reworked a bit
-    #       Stop storing in a .py file
-    #       What is the purpose of problems? Whats the end goal?
+    # DEMO: Automatically lock device in response to ANY problem to show
+    #       proof of concept.
+    # TODO: Longterm - store problem in device as a command,
+    #       turn device status red, take action based on device/preset settings
+    
+    def POST(self):
+        # DEMO FUNCTION - AUTOMATICALLY LOCK IN CASE OF PROBLEM
+        print "IN DO_PROBLEM"
+        global device_list
+        i = web.data()
+        print "RECIEVED DATA:", i
+        for UDID in device_list:
+            if UDID == i:
+                print "PROBLEM: LOCKING", UDID
+                queue('DeviceLock', UDID)
+                device_list[UDID].hasProblem()
+
+        return ''
+
+    """
     def GET(self):
         global problems
         problem_detect = ' ('
@@ -590,6 +626,7 @@ class do_problem:
         fd = open('problems.py', 'w')
         fd.write(out)
         fd.close()
+    """
 
 class mdm_ca:
     def GET(self):

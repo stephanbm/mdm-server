@@ -47,6 +47,9 @@ class device:
     def getUDID(self):
         return self.UDID
 
+    def getName(self):
+        return self.name
+
     def getQueueInfo(self):
         # Returns information needed by queue function
         return self.pushMagic, self.deviceToken
@@ -73,7 +76,7 @@ class device:
         d['owner'] = self.owner
         d['location'] = self.location
         d['geo'] = self.GEO
-        d['status'] = ['success', 'warning', 'danger'][self.status]
+        d['status'] = ['success', 'warning', 'default', 'danger'][self.status]
         #d['icon'] = ['ok', 'refresh', 'remove'][self.status] # possible glyphicon functionality
 
         # Send back 5 most recent commands
@@ -217,3 +220,9 @@ class device:
                 self.status = 2
                 self.cmdList[command['cmd']['CommandUUID']]['status'] = 'danger'
                 self.cmdList[command['cmd']['CommandUUID']]['response'] = {'Status':'TimeoutError'}
+
+
+    def hasProblem(self):
+        # SentryApp has detected a problem
+        print "In hasProblem"
+        self.status = 3
