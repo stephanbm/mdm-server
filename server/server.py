@@ -3,7 +3,6 @@ import cPickle as pickle
 from device import device # Custom device class
 from plistlib import *
 from APNSWrapper import *
-from problems import *
 from datetime import datetime
 # needed to handle verification of signed messages from devices
 from M2Crypto import SMIME, X509, BIO
@@ -103,7 +102,6 @@ urls = (
     '/manifest', 'app_manifest',
     '/app', 'app_ipa',
     '/problem', 'do_problem',
-    '/problemjb', 'do_problem',
     '/poll', 'poll',
     '/getcommands', 'get_commands',
     '/devices', 'dev_tab',
@@ -436,7 +434,7 @@ def update():
     # Function to update devices on the frontend
     # Is called on page load and polling
 
-    global problems, device_list
+    global device_list
     
     # Create list of devices
     dev_list_out = []
@@ -446,7 +444,7 @@ def update():
     # Format output as a dict and then return as JSON
     out = dict()
     out['dev_list'] = dev_list_out
-    out['problems'] = '<br>'.join(problems)
+    #out['problems'] = '<br>'.join(problems)
 
     return json.dumps(out)
 
@@ -610,9 +608,9 @@ class do_problem:
 
         return ''
 
+
     """
-    def GET(self):
-        global problems
+        # Old code for reference
         problem_detect = ' ('
         problem_detect += datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         if web.ctx.path == "/problem":
@@ -620,12 +618,6 @@ class do_problem:
         elif web.ctx.path == "/problemjb":
             problem_detect += ') Jailbreak detected for ' 
         problem_detect += web.ctx.ip
-
-        problems.insert(0, problem_detect)
-        out = "\nproblems = %s" % problems
-        fd = open('problems.py', 'w')
-        fd.write(out)
-        fd.close()
     """
 
 class mdm_ca:
