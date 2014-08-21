@@ -30,6 +30,15 @@ function populate_devices(){
         });
       });
 
+      // Set dismiss button to send dismiss command to the server
+      $(".dismiss-btn").click(function(event){
+        var udid = $(this).closest(".panel").attr("id");
+        var upid = $(this).attr("id");
+
+        $.post("/dismiss", JSON.stringify({"UDID":udid, "UPID":upid}), function(){});
+      });
+
+
       // Puts HTML content inside the popover
       $(".trigger").popover({
         html: true,

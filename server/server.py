@@ -4,6 +4,7 @@ from device import device # Custom device class
 from plistlib import *
 from APNSWrapper import *
 from datetime import datetime
+from urlparse import urlparse, parse_qs
 # needed to handle verification of signed messages from devices
 from M2Crypto import SMIME, X509, BIO
 
@@ -102,6 +103,7 @@ urls = (
     '/manifest', 'app_manifest',
     '/app', 'app_ipa',
     '/problem', 'do_problem',
+    '/dismiss', 'dismiss',
     '/poll', 'poll',
     '/getcommands', 'get_commands',
     '/devices', 'dev_tab',
@@ -473,6 +475,22 @@ class get_response:
             return "ERROR: Unable to retrieve response"
 
 
+class dismiss:
+    def POST(self):
+        # Endpoint to dismiss a problem
+        global device_list
+
+        i = json.loads(web.data())
+
+        UPID = i['UPID']
+        UDID = i['UDID']
+
+        device_list[UDID].dismissProblem(UPID)
+        print "DISMISSING PROBLEM:", UPID, "FROM DEVICE:", UDID
+
+        store_devices()
+        return
+
 class dev_tab:
     def POST(self):
         # Endpoint to return list of devices with a list of device info
@@ -589,36 +607,38 @@ class sentrycheckin:
         return tempUDID
 
 class do_problem:
-    # DEMO: Automatically lock device in response to ANY problem to show
-    #       proof of concept.
-    # TODO: Longterm - store problem in device as a command,
-    #       turn device status red, take action based on device/preset settings
-    
+    # A problem has appeared - add it to device
     def POST(self):
-        # DEMO FUNCTION - AUTOMATICALLY LOCK IN CASE OF PROBLEM
-        print "IN DO_PROBLEM"
         global device_list
-        i = web.data()
-        print "RECIEVED DATA:", i
-        for UDID in device_list:
-            if UDID == i:
-                print "PROBLEM: LOCKING", UDID
-                queue('DeviceLock', UDID)
-                device_list[UDID].hasProblem()
 
-        return ''
+        # Grab info from device
+        # Fake a URL for easy parsing
+        i = "http://thisisaurl.com/?" + web.data()
+        i = parse_qs(urlparse(i).query)
 
+        type = i['type'][0]
+        UDID = i['UDID'][0]
 
-    """
-        # Old code for reference
-        problem_detect = ' ('
-        problem_detect += datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        if web.ctx.path == "/problem":
-            problem_detect += ') Debugger attached to '
-        elif web.ctx.path == "/problemjb":
-            problem_detect += ') Jailbreak detected for ' 
-        problem_detect += web.ctx.ip
-    """
+        # Time as a string (easily sortable)
+        time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        # Generate Unique Problem Identifier (UPID)
+        UPID = str(uuid.uuid4())
+
+        try:
+            device_list[UDID].addProblem(type, time, UPID)
+            print "PROBLEM:", type, "FROM:", UDID
+        except:
+            # UDID does not match a device...consider a popup of some sort?
+            # Perhaps sentry-app doesn't know the UDID?
+            print "ERROR: CANNOT ADD PROBLEM", type, "TO DEVICE", UDID
+            return False
+
+        # Automatically react here if necessary.
+        #queue('DeviceLock', UDID)
+
+        store_devices()
+        return True
 
 class mdm_ca:
     def GET(self):

@@ -48,6 +48,13 @@
         </tr>
       </thead>
       <tbody>
+{{#problems}}
+        <tr id="problem{{UPID}}">
+          <td><span class="glyphicon danger glyphicon-warning-sign"></span></td>
+          <td>Problem:{{type}} at {{time}} UTC</td>
+          <td><button type="button" class="btn btn-xs btn-primary dismiss-btn" id="{{UPID}}">Dismiss</button></td>
+        </tr>
+{{/problems}}
 {{#commands}}
         <tr id="command{{response.CommandUUID}}">
           <td><span class="glyphicon {{status}} glyphicon-certificate"></span></td>

@@ -40,6 +40,11 @@ class device:
         # {'command', 'response', 'order', 'status'}
         self.cmdList = {}
 
+        # Dictionary of problems
+        # Keys are UPID, value is dictionary
+        # {'type', 'dismissed', 'time', 'UPID'}
+        self.problems = {}
+
         # Queue to hold commands that HAVE NOT been sent
         self.queue = deque()
 
@@ -63,6 +68,12 @@ class device:
             temp.append((self.cmdList[key]['order'], key))
         return sorted(temp, reverse=True)
 
+    def sortProblems(self):
+        temp = []
+        for key in self.problems:
+            if self.problems[key]['dismissed'] == False:
+                temp.append((self.problems[key]['time'], self.problems[key]))
+        return  sorted(temp, reverse=True)
 
     def populate(self):
         # Returns info as a dictionary for use with mustache
@@ -76,7 +87,6 @@ class device:
         d['owner'] = self.owner
         d['location'] = self.location
         d['geo'] = self.GEO
-        # TODO: Add override for unacknoledged problem
         d['status'] = ['success', 'warning', 'default', 'danger'][self.status]
         #d['icon'] = ['ok', 'refresh', 'remove'][self.status] # possible glyphicon functionality
 
@@ -119,6 +129,16 @@ class device:
 
             else:
                 d['commands'].append(self.cmdList[tuple[1]])
+
+
+        d['problems'] = []
+        tempProblems = self.sortProblems()
+        for tuple in tempProblems:
+            d['problems'].append(tuple[1])
+
+        # Problem overrides visible status (device status remains the same, just display)
+        if len(d['problems']) > 0:
+            d['status'] = 'danger'
 
         return d
 
@@ -193,6 +213,18 @@ class device:
             self.cmdList[cmdUUID]['status'] = 'default'
             self.status = 2
 
+    def addProblem(self, type, time, UPID):
+        # Create a problem dict and add to problems
+        temp = {}
+        temp['type'] = type
+        temp['time'] = time
+        temp['dismissed'] = False
+        temp['UPID'] = UPID
+        self.problems[UPID] = temp
+
+    def dismissProblem(self, UPID):
+        self.problems[UPID]['dismissed'] = True
+
     def checkTimeout(self):
         # Checks for command timeout
         now = time.time()
@@ -221,9 +253,3 @@ class device:
                 self.status = 2
                 self.cmdList[command['cmd']['CommandUUID']]['status'] = 'default'
                 self.cmdList[command['cmd']['CommandUUID']]['response'] = {'Status':'TimeoutError'}
-
-
-    def hasProblem(self):
-        # SentryApp has detected a problem
-        print "In hasProblem"
-        self.status = 3
