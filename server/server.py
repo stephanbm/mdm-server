@@ -42,8 +42,12 @@ from M2Crypto import SMIME, X509, BIO
 #                  - Support for new device-based front end
 
 
+
 # Global variable setup
 LOGFILE = 'xactn.log'
+
+# Sentry App Endpoints
+SENTRY = 0
 
 # Dummy socket to get the hostname
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -90,28 +94,49 @@ device_list = dict()
 
 global mdm_commands
 
-urls = (
-    '/', 'root',
-    '/queue', 'queue_cmd_post',
-    '/checkin', 'do_mdm',
-    '/server', 'do_mdm',
-    '/ServerURL', 'do_mdm',
-    '/CheckInURL', 'do_mdm',
-    '/enroll', 'enroll_profile',
-    '/ca', 'mdm_ca',
-    '/favicon.ico', 'favicon',
-    '/manifest', 'app_manifest',
-    '/app', 'app_ipa',
-    '/problem', 'do_problem',
-    '/dismiss', 'dismiss',
-    '/poll', 'poll',
-    '/getcommands', 'get_commands',
-    '/devices', 'dev_tab',
-    '/response', 'get_response',
-    '/metadata', 'metadata',
-    '/sentrylocation', 'sentry_loc',
-    '/sentrycheckin', 'sentrycheckin',
-)
+if SENTRY:
+    urls = (
+        '/', 'root',
+        '/queue', 'queue_cmd_post',
+        '/checkin', 'do_mdm',
+        '/server', 'do_mdm',
+        '/ServerURL', 'do_mdm',
+        '/CheckInURL', 'do_mdm',
+        '/enroll', 'enroll_profile',
+        '/ca', 'mdm_ca',
+        '/favicon.ico', 'favicon',
+        '/manifest', 'app_manifest',
+        '/app', 'app_ipa',
+        '/problem', 'do_problem',
+        '/dismiss', 'dismiss',
+        '/poll', 'poll',
+        '/getcommands', 'get_commands',
+        '/devices', 'dev_tab',
+        '/response', 'get_response',
+        '/metadata', 'metadata',
+        '/sentrylocation', 'sentry_loc',
+        '/sentrycheckin', 'sentrycheckin',
+    )
+else:
+    urls = (
+        '/', 'root',
+        '/queue', 'queue_cmd_post',
+        '/checkin', 'do_mdm',
+        '/server', 'do_mdm',
+        '/ServerURL', 'do_mdm',
+        '/CheckInURL', 'do_mdm',
+        '/enroll', 'enroll_profile',
+        '/ca', 'mdm_ca',
+        '/favicon.ico', 'favicon',
+        '/manifest', 'app_manifest',
+        '/app', 'app_ipa',
+        '/poll', 'poll',
+        '/getcommands', 'get_commands',
+        '/devices', 'dev_tab',
+        '/response', 'get_response',
+        '/metadata', 'metadata',
+    )
+
 
 
 

@@ -146,33 +146,15 @@ When stopping the server, the standard control-c doesn't usually work.  Instead 
 
 The server uses the pickle library to save devices.  When the device class is updated, the pickle format may be invalidated, causing the server to error.  In order to fix this, remove the devicelist.pickle file (make a backup just in case!) and re-enroll all devices.
 
-# Client Reporting
+# Sentry App and Client Reporting
 
-The MDM server also has REST endpoints for reporting issues and geolocation data from the enrolled clients.  This functionality may be used at a later point in time by a security app. The API can be imported into any project as follows:
+The MDM server also has REST endpoints for the [sentry-app](https://github.com/project-imas/sentry-app) to report issues and update geolocation.
 
-* Click on the top level Project item and add files ("option-command-a")
-* Navigate to client-reporting/
-* Highlight the client-reporting subdirectory
-* Click the Add button
+These endpoints will be inactive by default, and must be enabled before use.  If the sentry-app is not used then it is highly recommended to keep these endpoints inactive for security reasons.  On line ~50 in server/server.py, change the SENTRY variable to 1 if pairing to the sentry app, otherwise it should remain 0 for just the MDM server.
 
-The library provides the following functions:
-
-    +(void) setHostAddress: (NSString*) host; // Set where the MDM server lives
-    +(void) setPause : (BOOL) toggle; // Toggle whether to add a thread execution pause to allow requests to finish
-    +(void) reportJailbreak;  // Report that the device has been jailbroken
-    +(void) reportDebugger; // Report that the application has a debugger attached
-    +(void) reportLocation : (CLLocationCoordinate2D*) coords; // Report the lat/lon location of the device
-    
-"setHostAddress" and "setPause" are meant to be set once only, and effect all "report" calls.  An example usage may look like:
-
-    // Code in application init
-    [client_reporting setHostAddress:@"192.168.0.0"];
-    [client_reporting setPause:YES];
-    
-    // Later code during execution
-    [client_reporting reportDebugger]
-
-This client API can be coupled with the [iMAS security-check controls](git@github.com:project-imas/security-check.git) to provide accurate reporting of jailbreak and debugger detection.  
+    # 1 if pairing with the sentry app
+    # 0 if using just the MDM server (disables sentry endpoints)
+    SENTRY = 0
 
 
 Apologies for the long and complex setup, we hope to eventually make things easier and simpler.  Please post questions to github if you get stuck and we'll do our best to help.  Enjoy!
