@@ -47,7 +47,7 @@ from M2Crypto import SMIME, X509, BIO
 LOGFILE = 'xactn.log'
 
 # Sentry App Endpoints
-SENTRY = 0
+SENTRY = 1
 
 # Dummy socket to get the hostname
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -114,8 +114,8 @@ if SENTRY:
         '/devices', 'dev_tab',
         '/response', 'get_response',
         '/metadata', 'metadata',
-        '/sentrylocation', 'sentry_loc',
         '/sentrycheckin', 'sentrycheckin',
+        '/geolocation', 'update_geoloc',
     )
 else:
     urls = (
@@ -664,6 +664,29 @@ class do_problem:
 
         store_devices()
         return True
+
+class update_geoloc:
+    def POST(self):
+        global device_list
+
+        # Grab info from device
+        # Fake a URL for easy parsing
+        i = "http://thisisaurl.com/?" + web.data()
+        i = parse_qs(urlparse(i).query)
+
+        UDID = i['UDID'][0]
+        x, y = i['x'][0], i['y'][0]
+
+        try:
+            device_list[UDID].updateLocation(x, y)
+            print "UPDATING LOCATION FOR DEVICE:", UDID
+        except:
+            # Sentry app doesn't know UDID?
+            print "ERROR: CANNOT UPDATE LOCATION FOR DEVICE:", UDID
+
+        store_devices()
+        return
+
 
 class mdm_ca:
     def GET(self):

@@ -4,7 +4,7 @@ from operator import itemgetter
 import time, datetime, copy
 
 class device:
-    TIMEOUT = 20    # Number of seconds before command times out
+    TIMEOUT = 20    # Number of seconds before a command times out
     WHITELIST = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 "
     def __init__(self, newUDID, tuple):
         self.UDID = newUDID
@@ -13,17 +13,16 @@ class device:
         self.deviceToken = tuple[2]
         self.unlockToken = tuple[3]
 
-        # Hard coded information to show possible features
-        self.GEO = "42*21'29''N 71*03'49''W"
-
-        # Owner and location default to unassigned
+        # Variables that are unknown to begin with
         self.owner = 'Unassigned'
         self.location = 'Unassigned'
+        self.GEO = "Unknown"
 
-        self.status = 0 # 0=ready for command (green? gray?)
+        # Device status
+        self.status = 0 # 0=last command successful (green)
                         # 1=command in queue (yellow)
-                        # 2=error/timeout (red)
-                        # maybe have green (last command successful?)
+                        # 2=device possibly offline - after error/timeout (gray)
+                        # 3=device has registered a problem (red)
 
         # Possible additional parameters based on query commands
         #self.availableCapacity
@@ -166,6 +165,11 @@ class device:
         self.name = newName
         self.model = newModel
         self.OS = newOS
+
+
+    def updateLocation(self, x, y):
+        # Update device's location using apple's coordinates
+        self.GEO = '%0.2f, %0.2f'%(float(x), float(y))
 
     def reenroll(self, newIP, newPush, newUnlock):
         self.IP = newIP
